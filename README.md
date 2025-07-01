@@ -6,8 +6,8 @@
 
 ```bash
 # Клонирование и запуск
-git clone https://github.com/parad1so/ngx_dynamic_healthcheck.git
-cd ngx_dynamic_healthcheck
+git clone https://github.com/parad1so/deploy-nginx-healthcheck
+cd deploy-nginx-healthcheck
 
 # Развертывание всей среды
 bash scripts/deploy.sh

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slow Response - Server 3</title>
+    <script>
+        // Имитация медленного ответа
+        setTimeout(() => {
+            document.body.innerHTML = '<h1>Slow Response from Server 3</h1><p>This response took 5 seconds</p><p>Timestamp: ' + new Date().toISOString() + '</p>';
+        }, 5000);
+    </script>
+</head>
+<body>
+    <h1>Loading...</h1>
+    <p>Please wait 5 seconds for response from Server 3</p>
+</body>
+</html>

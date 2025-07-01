@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # Nginx с модулем dynamic healthcheck
+  nginx-healthcheck:
+    build: .
+    container_name: nginx-healthcheck
+    ports:
+      - "80:80"
+      - "8081:8081"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - tomcat1
+      - tomcat2
+      - tomcat3
+    networks:
+      - healthcheck-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Первый Tomcat сервер (всегда доступен)
+  tomcat1:
+    image: tomcat:9-jdk11-openjdk
+    container_name: tomcat1
+    ports:
+      - "8080:8080"
+    environment:
+      - CATALINA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - ./webapps/app1:/usr/local/tomcat/webapps/ROOT
+    networks:
+      - healthcheck-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Второй Tomcat сервер (нормальная работа)
+  tomcat2:
+    image: tomcat:9-jdk11-openjdk
+    container_name: tomcat2
+    ports:
+      - "8082:8080"
+    environment:
+      - CATALINA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - ./webapps/app2:/usr/local/tomcat/webapps/ROOT
+    networks:
+      - healthcheck-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Третий Tomcat сервер (периодически недоступен для тестирования)
+  tomcat3:
+    image: tomcat:9-jdk11-openjdk
+    container_name: tomcat3
+    ports:
+      - "8083:8080"
+    environment:
+      - CATALINA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - ./webapps/app3:/usr/local/tomcat/webapps/ROOT
+      - ./scripts:/scripts
+    networks:
+      - healthcheck-net
+    restart: unless-stopped
+    # Этот сервер может быть остановлен для тестирования failover
+    #profiles:
+    # - full
+
+  # Утилитарный контейнер для тестирования и мониторинга
+  testing-tools:
+    image: curlimages/curl:latest
+    container_name: testing-tools
+    networks:
+      - healthcheck-net
+    volumes:
+      - ./scripts:/scripts
+    command: sleep infinity
+    profiles:
+      - testing
+
+  # Мониторинг с Prometheus (опционально)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - healthcheck-net
+    profiles:
+      - monitoring
+
+volumes:
+  nginx-logs:
+    driver: local
+
+networks:
+  healthcheck-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

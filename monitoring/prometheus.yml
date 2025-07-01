@@ -1,0 +1,77 @@
+# Конфигурация Prometheus для мониторинга nginx и Tomcat
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Мониторинг самого Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Мониторинг nginx через nginx-prometheus-exporter (если добавлен)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-healthcheck:80']
+    metrics_path: '/healthcheck/status'
+    params:
+      format: ['prometheus']
+    scrape_interval: 10s
+
+  # Мониторинг Tomcat серверов
+  - job_name: 'tomcat1'
+    static_configs:
+      - targets: ['tomcat1:8080']
+    metrics_path: '/manager/status'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  - job_name: 'tomcat2'
+    static_configs:
+      - targets: ['tomcat2:8080']
+    metrics_path: '/manager/status'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  - job_name: 'tomcat3'
+    static_configs:
+      - targets: ['tomcat3:8080']
+    metrics_path: '/manager/status'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Мониторинг healthcheck эндпоинтов
+  - job_name: 'healthcheck-endpoints'
+    static_configs:
+      - targets: 
+          - 'tomcat1:8080'
+          - 'tomcat2:8080'
+          - 'tomcat3:8080'
+    metrics_path: '/health'
+    scrape_interval: 5s
+    scrape_timeout: 3s
+
+  # Blackbox мониторинг веб-сервисов (если добавлен blackbox_exporter)
+  # - job_name: 'blackbox'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets:
+  #       - http://nginx-healthcheck/
+  #       - http://nginx-healthcheck/app/
+  #       - http://tomcat1:8080/
+  #       - http://tomcat2:8080/
+  #       - http://tomcat3:8080/
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: blackbox_exporter:9115

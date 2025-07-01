@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomcat Server 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f5e8;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .server-info {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .status {
+            background: #2196F3;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ Tomcat Server 1</h1>
+        <div class="server-info">
+            <h2>Сервер: tomcat1:8080</h2>
+            <p>Основной сервер приложения</p>
+        </div>
+        
+        <div class="status">
+            <h3>✅ Статус: АКТИВЕН</h3>
+            <p>Сервер работает нормально</p>
+        </div>
+
+        <div>
+            <h3>Информация о запросе:</h3>
+            <p><strong>Время:</strong> <span class="timestamp" id="timestamp"></span></p>
+            <p><strong>User-Agent:</strong> <span id="user-agent"></span></p>
+            <p><strong>IP адрес:</strong> Будет показан nginx</p>
+        </div>
+
+        <div>
+            <h3>Тестовые эндпоинты:</h3>
+            <ul style="text-align: left;">
+                <li><a href="/health">GET /health</a> - Проверка здоровья</li>
+                <li><a href="/api/status">GET /api/status</a> - API статус</li>
+                <li><a href="/slow">GET /slow</a> - Медленный ответ (5 сек)</li>
+            </ul>
+        </div>
+
+        <div>
+            <a href="/">🔄 Обновить страницу</a> |
+            <a href="/healthcheck/status" target="_blank">📊 Статус Healthcheck</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('ru-RU');
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        
+        // Автообновление времени каждые 5 секунд
+        setInterval(() => {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('ru-RU');
+        }, 5000);
+    </script>
+</body>
+</html>
